@@ -1,0 +1,108 @@
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #0f1115;
+  color: #e6e6e6;
+}
+
+.container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px 16px 80px;
+}
+
+nav {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  border-bottom: 1px solid #23262e;
+  align-items: center;
+}
+
+nav a, nav button {
+  color: #e6e6e6;
+  text-decoration: none;
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+nav .brand { font-weight: 700; margin-right: auto; }
+
+h1 { font-size: 22px; }
+h2 { font-size: 18px; margin-top: 32px; }
+
+label {
+  display: block;
+  margin-top: 14px;
+  margin-bottom: 4px;
+  font-size: 13px;
+  color: #aaa;
+}
+
+input[type="text"], input[type="email"], input[type="password"], input[type="number"], textarea, select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #2a2d36;
+  background: #1a1c22;
+  color: #e6e6e6;
+  font-size: 14px;
+}
+
+textarea { min-height: 140px; resize: vertical; }
+
+button.primary {
+  margin-top: 18px;
+  padding: 10px 18px;
+  border-radius: 6px;
+  border: none;
+  background: #4f7cff;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button.secondary {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid #4f7cff;
+  background: transparent;
+  color: #4f7cff;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.card {
+  border: 1px solid #23262e;
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 14px;
+  background: #15171d;
+}
+
+.score-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #1f3a1f;
+  color: #7be07b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.error { color: #ff6b6b; margin-top: 10px; font-size: 13px; }
+.muted { color: #999; font-size: 13px; }
+
+pre {
+  white-space: pre-wrap;
+  background: #1a1c22;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 13px;
+}
