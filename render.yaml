@@ -23,6 +23,8 @@ services:
         value: mx
       - key: CORS_ORIGINS
         value: "*"
+      - key: PYTHON_VERSION
+	value: 3.11.9
 
   - type: web
     name: job-agent-frontend
