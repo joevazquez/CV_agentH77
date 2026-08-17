@@ -7,6 +7,8 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
       - key: DATABASE_URL
         sync: false
       - key: JWT_SECRET
@@ -21,10 +23,12 @@ services:
         sync: false
       - key: ADZUNA_COUNTRY
         value: mx
+      - key: JOOBLE_API_KEY
+        sync: false
       - key: CORS_ORIGINS
         value: "*"
-      - key: PYTHON_VERSION
-	value: 3.11.9
+      - key: CRON_SECRET
+        generateValue: true
 
   - type: web
     name: job-agent-frontend
