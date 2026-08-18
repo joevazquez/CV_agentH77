@@ -93,6 +93,14 @@ class JobWithScoreOut(JobOut):
     explanation: Optional[str]
 
 
+class ManualJobCreate(BaseModel):
+    title: str
+    company: Optional[str] = None
+    location: Optional[str] = None
+    url: Optional[str] = None
+    description: str
+
+
 # ---------- Matches ----------
 
 class MatchOut(BaseModel):
