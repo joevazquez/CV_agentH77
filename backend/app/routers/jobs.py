@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+import uuid
 
 from app import models, schemas, auth
 from app.database import get_db
@@ -58,6 +59,32 @@ async def _fetch_from_all_sources(
 @router.get("", response_model=list[schemas.JobOut])
 def list_jobs(db: Session = Depends(get_db), limit: int = 50):
     return db.query(models.Job).order_by(models.Job.fetched_at.desc()).limit(limit).all()
+
+
+@router.post("/manual", response_model=schemas.JobOut)
+def create_manual_job(
+    payload: schemas.ManualJobCreate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Registra una vacante que el usuario encontro en otro lado (OCC, LinkedIn,
+    Indeed, sitio de la empresa, etc.) pegando el link como referencia y la
+    descripcion copiada por el mismo -- no se hace scraping automatico del link,
+    ya que muchos portales lo prohiben en sus terminos de servicio."""
+    job = models.Job(
+        source="manual",
+        external_id=str(uuid.uuid4()),
+        title=payload.title.strip(),
+        company=payload.company,
+        location=payload.location,
+        description=payload.description.strip(),
+        url=payload.url or "",
+        remote=False,
+    )
+    db.add(job)
+    db.commit()
+    db.refresh(job)
+    return job
 
 
 @router.post("/search", response_model=list[schemas.JobWithScoreOut])

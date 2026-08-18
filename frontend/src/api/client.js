@@ -94,6 +94,7 @@ export const api = {
     return request(`/jobs/search?${params.toString()}`, { method: 'POST' })
   },
   listJobs: () => request('/jobs'),
+  createManualJob: (payload) => request('/jobs/manual', { method: 'POST', body: payload }),
 
   refreshMatches: () => request('/matches/refresh', { method: 'POST' }),
   listMatches: () => request('/matches'),

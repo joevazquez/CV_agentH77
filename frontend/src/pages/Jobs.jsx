@@ -12,6 +12,16 @@ export default function Jobs() {
   const [generatingId, setGeneratingId] = useState(null)
   const [applications, setApplications] = useState({}) // job_id -> application
 
+  // -- vacante manual (pegada desde otro sitio) --
+  const [manualTitle, setManualTitle] = useState('')
+  const [manualCompany, setManualCompany] = useState('')
+  const [manualLocation, setManualLocation] = useState('')
+  const [manualUrl, setManualUrl] = useState('')
+  const [manualDescription, setManualDescription] = useState('')
+  const [manualLoading, setManualLoading] = useState(false)
+  const [manualError, setManualError] = useState('')
+  const [manualResult, setManualResult] = useState(null) // { job, application }
+
   async function handleSearch(e) {
     e.preventDefault()
     setLoading(true)
@@ -67,6 +77,33 @@ export default function Jobs() {
       setError(err.message)
     } finally {
       setGeneratingId(null)
+    }
+  }
+
+  async function handleManualSubmit(e) {
+    e.preventDefault()
+    setManualLoading(true)
+    setManualError('')
+    setManualResult(null)
+    try {
+      const job = await api.createManualJob({
+        title: manualTitle,
+        company: manualCompany || null,
+        location: manualLocation || null,
+        url: manualUrl || null,
+        description: manualDescription,
+      })
+      const application = await api.createApplicationFromJob(job.id)
+      setManualResult({ job, application })
+      setManualTitle('')
+      setManualCompany('')
+      setManualLocation('')
+      setManualUrl('')
+      setManualDescription('')
+    } catch (err) {
+      setManualError(err.message)
+    } finally {
+      setManualLoading(false)
     }
   }
 
@@ -149,6 +186,57 @@ export default function Jobs() {
 
       {!loading && results.length === 0 && (
         <p className="muted">Escribe un puesto arriba y dale "Buscar" para ver vacantes.</p>
+      )}
+
+      <h2>¿Viste una vacante en otro sitio?</h2>
+      <p className="muted">
+        Si encontraste algo en OCC, LinkedIn, Indeed o en el sitio de la empresa, pega aqui el link (para
+        recordar de donde es) y copia/pega la descripcion del puesto. El agente te genera tu CV mejorado y carta
+        de presentacion para esa vacante especifica, igual que con las de arriba.
+      </p>
+
+      <form onSubmit={handleManualSubmit} className="card">
+        <label>Puesto</label>
+        <input type="text" value={manualTitle} onChange={(e) => setManualTitle(e.target.value)} required placeholder="ej. Analista Financiero" />
+
+        <label>Empresa (opcional)</label>
+        <input type="text" value={manualCompany} onChange={(e) => setManualCompany(e.target.value)} />
+
+        <label>Ubicacion (opcional)</label>
+        <input type="text" value={manualLocation} onChange={(e) => setManualLocation(e.target.value)} />
+
+        <label>Link de la vacante (opcional, solo como referencia)</label>
+        <input type="text" value={manualUrl} onChange={(e) => setManualUrl(e.target.value)} placeholder="https://..." />
+
+        <label>Descripcion del puesto (copia y pega el texto completo)</label>
+        <textarea
+          value={manualDescription}
+          onChange={(e) => setManualDescription(e.target.value)}
+          required
+          placeholder="Pega aqui la descripcion, requisitos y responsabilidades de la vacante"
+        />
+
+        {manualError && <div className="error">{manualError}</div>}
+        <button className="primary" type="submit" disabled={manualLoading}>
+          {manualLoading ? 'Generando...' : 'Generar mi CV y carta para esta vacante'}
+        </button>
+      </form>
+
+      {manualResult && (
+        <div className="card">
+          <h3 style={{ marginBottom: 4 }}>{manualResult.job.title}</h3>
+          <div className="muted">{manualResult.job.company} — {manualResult.job.location}</div>
+          {manualResult.job.url && (
+            <a href={manualResult.job.url} target="_blank" rel="noreferrer" className="muted">Ver vacante original →</a>
+          )}
+          <h4 style={{ marginBottom: 4, marginTop: 14 }}>Tu CV mejorado para esta vacante</h4>
+          <pre>{manualResult.application.tailored_cv}</pre>
+          <h4 style={{ marginBottom: 4 }}>Carta de presentacion sugerida</h4>
+          <pre>{manualResult.application.cover_letter}</pre>
+          <p className="muted" style={{ fontSize: 12 }}>
+            Tambien la puedes ver despues en la pestaña "Aplicaciones".
+          </p>
+        </div>
       )}
     </div>
   )
