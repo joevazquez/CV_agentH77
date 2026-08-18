@@ -88,6 +88,11 @@ class JobOut(BaseModel):
         from_attributes = True
 
 
+class JobWithScoreOut(JobOut):
+    score: float
+    explanation: Optional[str]
+
+
 # ---------- Matches ----------
 
 class MatchOut(BaseModel):
@@ -119,3 +124,21 @@ class ApplicationOut(BaseModel):
 
 class ApplicationMarkSubmitted(BaseModel):
     submitted_by_user: bool = True
+
+
+# ---------- Work Experience ----------
+
+class WorkExperienceCreate(BaseModel):
+    job_title: str
+    company: str
+    location: Optional[str] = None
+    start_period: str
+    end_period: Optional[str] = None
+    description: str
+
+
+class WorkExperienceOut(WorkExperienceCreate):
+    id: str
+
+    class Config:
+        from_attributes = True

@@ -108,3 +108,17 @@ class Application(Base):
     ready_to_send = Column(Boolean, default=False)        # queda lista para que el usuario la envie
     submitted_by_user = Column(Boolean, default=False)    # el usuario confirma que ya aplico manualmente
     created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class WorkExperience(Base):
+    __tablename__ = "work_experiences"
+
+    id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
+    user_id = Column(UUID(as_uuid=False), ForeignKey("users.id"), nullable=False)
+    job_title = Column(String, nullable=False)
+    company = Column(String, nullable=False)
+    location = Column(String, nullable=True)
+    start_period = Column(String, nullable=False)     # texto libre, ej "Enero 2022"
+    end_period = Column(String, nullable=True)          # vacio/None = "Actualidad"
+    description = Column(Text, nullable=False)          # caracteristicas generales / logros
+    created_at = Column(DateTime, default=datetime.utcnow)

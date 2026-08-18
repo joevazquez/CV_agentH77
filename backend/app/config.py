@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     adzuna_app_key: str = ""
     adzuna_country: str = "mx"
     cors_origins: str = "http://localhost:5173"
+    cron_secret: str = ""
+    jooble_api_key: str = ""
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

@@ -20,6 +20,15 @@ export default function Profile() {
   const [prefsSaving, setPrefsSaving] = useState(false)
   const [prefsMsg, setPrefsMsg] = useState('')
 
+  const [experiences, setExperiences] = useState([])
+  const [expForm, setExpForm] = useState({
+    job_title: '', company: '', location: '', start_period: '', end_period: '', description: '',
+  })
+  const [expSaving, setExpSaving] = useState(false)
+  const [expMsg, setExpMsg] = useState('')
+  const [regenerating, setRegenerating] = useState(false)
+  const [downloading, setDownloading] = useState(false)
+
   useEffect(() => {
     api.getCV().then((cv) => {
       setCvText(cv.raw_text || '')
@@ -38,7 +47,13 @@ export default function Profile() {
         keywords_exclude: (p.keywords_exclude || []).join(', '),
       })
     }).catch(() => {})
+
+    loadExperiences()
   }, [])
+
+  function loadExperiences() {
+    api.listExperience().then(setExperiences).catch(() => {})
+  }
 
   function toList(str) {
     return str.split(',').map((s) => s.trim()).filter(Boolean)
@@ -71,6 +86,60 @@ export default function Profile() {
       setCvMsg(err.message)
     } finally {
       setCvSaving(false)
+    }
+  }
+
+  async function addExperience(e) {
+    e.preventDefault()
+    setExpSaving(true)
+    setExpMsg('')
+    try {
+      await api.addExperience({
+        ...expForm,
+        end_period: expForm.end_period || null,
+      })
+      setExpForm({ job_title: '', company: '', location: '', start_period: '', end_period: '', description: '' })
+      loadExperiences()
+      setExpMsg('Experiencia agregada.')
+    } catch (err) {
+      setExpMsg(err.message)
+    } finally {
+      setExpSaving(false)
+    }
+  }
+
+  async function removeExperience(id) {
+    try {
+      await api.deleteExperience(id)
+      loadExperiences()
+    } catch (err) {
+      setExpMsg(err.message)
+    }
+  }
+
+  async function handleRegenerateCV() {
+    setRegenerating(true)
+    setExpMsg('')
+    try {
+      const cv = await api.regenerateCV()
+      setCvText(cv.raw_text || '')
+      setExpMsg('Tu CV se actualizo con tu experiencia laboral.')
+    } catch (err) {
+      setExpMsg(err.message)
+    } finally {
+      setRegenerating(false)
+    }
+  }
+
+  async function handleDownloadPdf() {
+    setDownloading(true)
+    setExpMsg('')
+    try {
+      await api.downloadCVPdf()
+    } catch (err) {
+      setExpMsg(err.message)
+    } finally {
+      setDownloading(false)
     }
   }
 
@@ -120,6 +189,62 @@ export default function Profile() {
             {cvSaving ? 'Guardando...' : 'Guardar CV'}
           </button>
         </form>
+      </div>
+
+      <div className="card">
+        <h2 style={{ marginTop: 0 }}>¿Quieres actualizar tu CV?</h2>
+        <p className="muted" style={{ fontSize: 13 }}>
+          Agrega cada trabajo que has tenido y el agente arma tu CV automaticamente. Puedes descargarlo en PDF cuando quieras.
+        </p>
+
+        <form onSubmit={addExperience}>
+          <label>Titulo del puesto</label>
+          <input type="text" value={expForm.job_title} onChange={(e) => setExpForm({ ...expForm, job_title: e.target.value })} placeholder="ej. Analista de Datos" required />
+
+          <label>Empresa / lugar donde trabajaste</label>
+          <input type="text" value={expForm.company} onChange={(e) => setExpForm({ ...expForm, company: e.target.value })} placeholder="ej. Banamex" required />
+
+          <label>Ubicacion (opcional)</label>
+          <input type="text" value={expForm.location} onChange={(e) => setExpForm({ ...expForm, location: e.target.value })} placeholder="ej. Ciudad de Mexico" />
+
+          <label>Periodo - inicio</label>
+          <input type="text" value={expForm.start_period} onChange={(e) => setExpForm({ ...expForm, start_period: e.target.value })} placeholder="ej. Enero 2022" required />
+
+          <label>Periodo - fin (dejalo vacio si sigues ahi)</label>
+          <input type="text" value={expForm.end_period} onChange={(e) => setExpForm({ ...expForm, end_period: e.target.value })} placeholder="ej. Diciembre 2023" />
+
+          <label>Caracteristicas generales / logros</label>
+          <textarea value={expForm.description} onChange={(e) => setExpForm({ ...expForm, description: e.target.value })} placeholder="Describe tus responsabilidades y logros principales en este puesto" required />
+
+          <button className="primary" type="submit" disabled={expSaving}>
+            {expSaving ? 'Agregando...' : 'Agregar experiencia'}
+          </button>
+        </form>
+
+        {experiences.length > 0 && (
+          <div style={{ marginTop: 20 }}>
+            <h3 style={{ marginBottom: 8 }}>Tu experiencia guardada</h3>
+            {experiences.map((exp) => (
+              <div key={exp.id} className="card" style={{ marginTop: 8 }}>
+                <strong>{exp.job_title}</strong> — {exp.company} {exp.location ? `· ${exp.location}` : ''}
+                <div className="muted" style={{ fontSize: 12 }}>{exp.start_period} - {exp.end_period || 'Actualidad'}</div>
+                <p style={{ fontSize: 13 }}>{exp.description}</p>
+                <button className="secondary" onClick={() => removeExperience(exp.id)}>Eliminar</button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {expMsg && <div className="muted" style={{ marginTop: 12 }}>{expMsg}</div>}
+
+        <div style={{ display: 'flex', gap: 10, marginTop: 16, flexWrap: 'wrap' }}>
+          <button className="primary" onClick={handleRegenerateCV} disabled={regenerating || experiences.length === 0}>
+            {regenerating ? 'Actualizando...' : 'Actualizar mi CV con esta experiencia'}
+          </button>
+          <button className="secondary" onClick={handleDownloadPdf} disabled={downloading}>
+            {downloading ? 'Descargando...' : 'Descargar mi CV en PDF'}
+          </button>
+        </div>
       </div>
 
       <div className="card">
