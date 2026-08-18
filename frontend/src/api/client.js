@@ -56,16 +56,50 @@ export const api = {
   getPreferences: () => request('/preferences'),
   savePreferences: (payload) => request('/preferences', { method: 'PUT', body: payload }),
 
-  fetchJobs: (query, location) =>
-    request(`/jobs/fetch?query=${encodeURIComponent(query)}${location ? `&location=${encodeURIComponent(location)}` : ''}`, {
-      method: 'POST',
-    }),
+  listExperience: () => request('/experience'),
+  addExperience: (payload) => request('/experience', { method: 'POST', body: payload }),
+  deleteExperience: (id) => request(`/experience/${id}`, { method: 'DELETE' }),
+  regenerateCV: () => request('/experience/regenerate-cv', { method: 'POST' }),
+  downloadCVPdf: async () => {
+    const token = getToken()
+    const res = await fetch(`${API_URL}/experience/download-pdf`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      throw new Error(data.detail || 'No se pudo descargar el CV')
+    }
+    const blob = await res.blob()
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'CV.pdf'
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(url)
+  },
+
+  fetchJobs: (query, location, salaryMin) => {
+    const params = new URLSearchParams({ query })
+    if (location) params.append('location', location)
+    if (salaryMin) params.append('salary_min', salaryMin)
+    return request(`/jobs/fetch?${params.toString()}`, { method: 'POST' })
+  },
+  fetchJobsFromPreferences: () => request('/jobs/fetch-my-preferences', { method: 'POST' }),
+  searchJobs: (query, location, salaryMin) => {
+    const params = new URLSearchParams({ query })
+    if (location) params.append('location', location)
+    if (salaryMin) params.append('salary_min', salaryMin)
+    return request(`/jobs/search?${params.toString()}`, { method: 'POST' })
+  },
   listJobs: () => request('/jobs'),
 
   refreshMatches: () => request('/matches/refresh', { method: 'POST' }),
   listMatches: () => request('/matches'),
 
   createApplication: (matchId) => request(`/applications/from-match/${matchId}`, { method: 'POST' }),
+  createApplicationFromJob: (jobId) => request(`/applications/from-job/${jobId}`, { method: 'POST' }),
   listApplications: () => request('/applications'),
   markSubmitted: (appId) => request(`/applications/${appId}/submitted`, { method: 'PATCH', body: { submitted_by_user: true } }),
 
