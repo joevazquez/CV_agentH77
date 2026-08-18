@@ -1,5 +1,6 @@
 import { Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom'
 import { api } from './api/client'
+import logo from './assets/logo.png'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
 import Profile from './pages/Profile.jsx'
@@ -24,13 +25,18 @@ export default function App() {
   return (
     <div>
       <nav>
-        <span className="brand">🤖 Agente de Empleo</span>
+        <Link to={loggedIn ? '/profile' : '/login'} className="brand">
+          <img src={logo} alt="CV_agent H77" />
+          <span className="brand-text">
+            <span className="brand-name">CV_AGENT H77</span>
+            <span className="brand-tagline">Buscando empleo, impulsando tu futuro</span>
+          </span>
+        </Link>
         {loggedIn && (
           <>
             <Link to="/profile">Mi perfil</Link>
-            <Link to="/jobs">Vacantes</Link>
-            <Link to="/matches">Matches</Link>
-            <Link to="/applications">Aplicaciones</Link>
+            <Link to="/jobs">Buscar empleo</Link>
+            <Link to="/applications">Mis aplicaciones</Link>
             <button onClick={logout}>Cerrar sesion</button>
           </>
         )}
